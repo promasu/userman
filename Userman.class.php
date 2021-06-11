@@ -523,9 +523,13 @@ class Userman extends FreePBX_Helpers implements BMO {
 					}
 				break;
 				case 'ucptemplate':
+					$userdata = $this->getUserByID($request['userid']);
 					$templateData = array(
 						'templatename' => isset($request['templatename']) ? $request['templatename'] : null,
 						'description' => isset($request['description']) ? $request['description'] : null,
+						'importedfromuid' => isset($request['userid']) ? $request['userid'] : null,
+						'importedfromuname' => isset($userdata['username']) ? $userdata['username'] : null,
+						'defaultexten' => isset($userdata['default_extension']) ? $userdata['default_extension'] : null,
 					);
 					if(!empty($request['id'])) {
 						$templateData['id'] = $request['id'];
@@ -1825,11 +1829,11 @@ class Userman extends FreePBX_Helpers implements BMO {
 		$widget['id'] = (string)Uuid::uuid4();
 		$moduleuc = ucfirst($widget['rawname']);
 		//call the module api to get the widgetlist
-		if(method_exists($this->FreePBX->$moduleuc,getWidgetListByModule)){
+		if(method_exists($this->FreePBX->$moduleuc,'getWidgetListByModule')){
 			// we need to add some var to sent only the default extension details
 			$u = $this->getUserByID($userid);
-			$defaultextension = $u['default_extension'];
-			$widget = $this->FreePBX->$moduleuc->getWidgetListByModule($defaultextension);
+			$defaultextension = $u['default_extension'];dbug($widget);
+			$widget = $this->FreePBX->$moduleuc->getWidgetListByModule($defaultextension,$userid,$moduleuc);
 		}else {
 			dbug('method doesnot exist in '.$moduleuc);
 		}
@@ -3428,9 +3432,9 @@ class Userman extends FreePBX_Helpers implements BMO {
 	}
 
 	public function addUcpTemplate($addData){
-		$sql = "INSERT INTO userman_ucp_templates(`templatename`,`description`)VALUES(:name,:description)";
+		$sql = "INSERT INTO userman_ucp_templates(`templatename`,`description`,`importedfromuid`,`importedfromuname`,`defaultexten`)VALUES(:name,:description,:importedfromuid,:importedfromuname,:defaultexten)";
 		$sth = $this->db->prepare($sql);
-		$sth->execute(array(':name' => $addData['templatename'], ':description' => $addData['description']));
+		$sth->execute(array(':name' => $addData['templatename'], ':description' => $addData['description'], ':importedfromuid' => $addData['importedfromuid'], ':importedfromuname' => $addData['importedfromuname'], ':defaultexten' => $addData['defaultexten']));
 		$id = $this->db->lastInsertId();
 		return $id;
 	}

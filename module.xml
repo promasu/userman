@@ -199,6 +199,9 @@
 			<field name="id" type="integer" primarykey="true" autoincrement="true"/>
 			<field name="templatename" type="string" length="150"/>
 			<field name="description" type="string" length="255" notnull="false"/>
+			<field name="importedfromuid" type="string" length="100" notnull="false"/>
+			<field name="importedfromuname" type="string" length="100" notnull="false" />
+			<field name="defaultexten" type="string" length="100" notnull="false" />
 			<field name="default" type="boolean" default="0"/>
 		</table>
 	</database>
