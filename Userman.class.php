@@ -3537,18 +3537,13 @@ class Userman extends FreePBX_Helpers implements BMO {
 		if($ret['status']) {
 			$directory = $directory['id'];
 			$uid = $ret['id'];
-			$permissions = $this->getAuthAllPermissions($directory);
-				if($permissions['modifyGroup']) {
-					if(!empty($data['um-groups'])) {
-						$groups = $this->getAllGroups();
-						foreach($groups as $group) {
-							if(in_array($group['id'],$data['um-groups']) && !in_array($ret['id'],$group['users'])) {
-								$group['users'][] = $ret['id'];
-								$this->updateGroup($group['id'],$group['groupname'], $group['groupname'], $group['description'], $group['users']);
-							}
-						}
-					}
+			$groups = $this->getAllGroups();
+			foreach($groups as $group) {
+				if($group['id']==$directory && !in_array($uid,$group['users'])) {
+					$group['users'][] = $uid;
+					$this->updateGroup($group['id'],$group['groupname'], $group['groupname'], $group['description'], $group['users']);
 				}
+			}
 			//set all option to yes
 			$sql = "select * from userman_groups_settings WHERE `gid`=? AND `module` like 'ucp|%' ";
 			$sth = $this->db->prepare($sql);
