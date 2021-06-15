@@ -18,11 +18,13 @@ $sth = \FreePBX::Database()->prepare($sql);
 $sth->execute();
 $row = $sth->fetch(PDO::FETCH_ASSOC);
 if($row['Cardinality'] == 0){
-	out("Adding default template settings");
+	$brand = \FreePBX::Config()->get('DASHBOARD_FREEPBX_BRAND');
+	$brandtemp = $brand.'-Template';
+	out("Adding default template settings ".$brandtemp );
 	// add the defult template
-	$insert = "INSERT INTO userman_ucp_templates(`templatename`,`description`,`importedfromuname`)VALUES('Default-Template','template with Vm and CDR','Default-Template')";
+	$insert = "INSERT INTO userman_ucp_templates(`templatename`,`description`,`importedfromuname`)VALUES(?,'Template with Vm and CDR widgets','Default-Template')";
 	$sth = \FreePBX::Database()->prepare($insert);
-	$sth->execute();
+	$sth->execute(array($brandtemp));
 	//insert the template dashboard
 	$sql = "INSERT INTO userman_template_settings(`tid`,`module`,`key`,`val`,`type`) VALUES(:tid,'UCP',:key,:val,:type)";
 	$sth = \FreePBX::Database()->prepare($sql);
