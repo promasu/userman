@@ -202,8 +202,7 @@
 			<field name="importedfromuid" type="string" length="100" notnull="false"/>
 			<field name="importedfromuname" type="string" length="100" notnull="false" />
 			<field name="defaultexten" type="string" length="100" notnull="false" />
-			<field name="default" type="boolean" default="0"/>
-		</table>
+			</table>
 	</database>
 	<supported>
 		<version>15.0</version>

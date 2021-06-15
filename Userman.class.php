@@ -1008,8 +1008,8 @@ class Userman extends FreePBX_Helpers implements BMO {
 			case "delete":
 			case "email":
 			case "getUcpTemplates":
-			case "makeTemplateDefault":
 			case "redirectUCP":
+			case "rebuildtemplate":
 				return true;
 			break;
 			case "setlocales":
@@ -1063,9 +1063,6 @@ class Userman extends FreePBX_Helpers implements BMO {
 				$this->setDefaultDirectory($request['id']);
 				return array("status" => true);
 			break;
-			case "makeTemplateDefault":
-				$this->setDefaultTemplate($request['id']);
-				return array("status" => true);
 			break;
 			case "redirectUCP":
 				if(!empty($request['id']) && !empty($request['key'])) {
@@ -1081,6 +1078,13 @@ class Userman extends FreePBX_Helpers implements BMO {
 					return array("status" => false, 'message'=> 'Error! Something went wrong');
 				}
 				return array("status" => false, 'message'=> 'Error! Something went wrong');
+			break;
+			case "rebuildtemplate":
+				if(!empty($request['templateid'])){
+					return $this->rebuildtemplate($request['templateid']);
+				}else {
+					return ['status'=>false,'message'=>'TemplateID not valid'];
+				}
 			break;
 			case "getDirectories":
 				return $this->getAllDirectories();
@@ -3519,16 +3523,7 @@ class Userman extends FreePBX_Helpers implements BMO {
 		return array("status" => true, "type" => "success", "message" => _("Template Successfully Deleted"));
 	}
 
-	public function setDefaultTemplate($id) {
-		$sql = "UPDATE userman_ucp_templates SET `default` = 0";
-		$sth = $this->db->prepare($sql);
-		$sth->execute();
-		$sql = "UPDATE userman_ucp_templates SET `default` = 1 WHERE `id` = ?";
-		$sth = $this->db->prepare($sql);
-		$sth->execute(array($id));
-        }
-
-		/*Generate a User for Template creation,view/edit */
+	/*Generate a User for Template creation,view/edit */
 	public function generateTemplateCreatorUser(){
 		$directory = $this->getDefaultDirectory();
 		$exten = $this->getUnUsedextension();
@@ -3627,6 +3622,26 @@ class Userman extends FreePBX_Helpers implements BMO {
 		} else {
 			return ['status'=>false,'message'=> 'Template Not assigned'];
 		}
-		
+	}
+	public function rebuildtemplate($tempid){
+		$users = $this->getAllUsers();
+		$count = 0;
+		foreach($users as $user){
+			$assigntemplate = $this->getCombinedModuleSettingByID($user['id'],'ucp|template','assigntemplate');
+			$templateid = $this->getCombinedModuleSettingByID($user['id'],'ucp|template','templateid');
+			if($assigntemplate == '0'){
+				continue;// template not assigned
+			}
+			if($templateid ==  $tempid){
+				$re = $this->updateUserUcpByTemplate($user['id'],$tempid);
+				if($re['status']){
+					$count ++;
+				}
+			} 
+		}
+		if($count > 0){
+			return ['status'=>true,'message'=> $count.' User(s)  dashboard widgets reconfigured'];
+		}
+		return ['status'=>false,'message'=> 'widgets not reconfigured'];
 	}
 }

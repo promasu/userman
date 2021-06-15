@@ -503,12 +503,9 @@ function ucptemplatesActions(value, row, index) {
 	var unlockKey = "'" + row.key + "'";
 	var html = '<a href="?display=userman&amp;action=showucptemplate&amp;template='+row.id+'" title="Reimport from a user"><i class="fa fa-edit"> </i></a>';
 	html += '<a class="clickable" onclick="return redirectToUCP('+row.id+','+unlockKey+')" title="Edit Template"><i class="fa fa-eye"" data-section="ucptemplates" data-type="ucptemplates"  data-id="'+row.id+'"></i></a>';
+	html += '<a class="clickable" onclick="return rebuildwidgets('+row.id+')" title="Force Rebuild widgets"><i class="fa fa-refresh"" data-section="ucptemplates" data-type="ucptemplates"  data-id="'+row.id+'"></i></a>';
 	html += '<a class="clickable"><i class="fa fa-trash-o" data-section="ucptemplates" data-type="ucptemplates"  data-id="'+row.id+'"></i></a>';
 	return html;
-}
-
-function defaultformat(value, row, index) {
-	return '<div class="default-check '+(row.default == "1" ? 'check' : '')+'" data-id="'+row.id+'" data-from="template"><i class="fa fa-check" aria-hidden="true"></i></div>';
 }
 
 $("#table-ucptemplates").on("post-body.bs.table", function () {
@@ -528,6 +525,19 @@ $("#table-ucptemplates").on("post-body.bs.table", function () {
 		}
 	});
 });
+
+function rebuildwidgets(id) {
+	if(confirm(_("Are you sure rebuild all Users widgets associated with this Template ?"))) {
+		$.post("ajax.php?module=userman&command=rebuildtemplate", {templateid: id}, function( data ) {
+			if(data.status) {
+				alert(data.message);
+			} else {
+				alert(data.message);
+			}
+		});
+	}
+}
+
 function redirectToUCP(id, key) {
 	$.post("ajax.php?module=userman&command=redirectUCP", {id: id, key: key}, function( data ) {
 		if(data.status) {
