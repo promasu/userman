@@ -531,7 +531,7 @@ $("#table-ucptemplates").on("post-body.bs.table", function () {
 function redirectToUCP(id, key) {
 	$.post("ajax.php?module=userman&command=redirectUCP", {id: id, key: key}, function( data ) {
 		if(data.status) {
-			var url = `/ucp/index.php?unlockkey=`+key;
+			var url = `/ucp/index.php?unlockkey=`+key+'&templateid='+id;
 			window.open(url, '_blank');
 		} else {
 			alert(data.message);
