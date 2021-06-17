@@ -1874,14 +1874,41 @@ class Userman extends FreePBX_Helpers implements BMO {
 	
 	/* Update users settings by the given template setting*/
 	public function updateUserUcpByTemplate($userid,$templateid){
+		//add the side bar dasboards and its widgets
+		$sql = "SELECT a.val, a.type,a.key FROM userman_template_settings a WHERE a.tid = :tid AND `key`='dashboard-simple-layout' ";
+		$sth = $this->db->prepare($sql);
+		$sth->execute(array(':tid' => $templateid));
+		$results = $sth->fetch(PDO::FETCH_ASSOC);
+		if($results) {
+			$this->removeUCPSideDashboardSettingByID($userid);
+			$dashbords = json_decode($results['val'],true);
+			$newsidedash = [];
+			foreach($dashbords as $dash){
+				$id = (string)Uuid::uuid4();
+				$name = $dash['name'];
+				$allowedwidget = [];
+				$updatedwidget = $this->getUserModulesSettingBasedOnTemplate($dash,$userid,$templateid);
+				if(!$updatedwidget){
+					//this is not a valid widget for this user
+					continue;
+				}
+				$newsidedash[] = $updatedwidget;
+			}
+			$sidedashboards = json_encode($newsidedash);
+			//insert sidebar dasboard widgets
+			$sql = "INSERT INTO userman_users_settings(`uid`,`module`,`key`,`val`,`type`) VALUES(:uid,'ucp|Global',:key,:val,:type)";
+			$sth = $this->db->prepare($sql);
+			$sth->execute(array(':uid' => $userid, ':key' => $results['key'],':val' => $sidedashboards,':type'=>$results['type']));
+		}
+		// Adding the main dashboards
 		$sql = "SELECT a.val, a.type,a.key FROM userman_template_settings a WHERE a.tid = :tid AND `key`='dashboards' ";
 		$sth = $this->db->prepare($sql);
 		$sth->execute(array(':tid' => $templateid));
 		$results = $sth->fetch(PDO::FETCH_ASSOC);
 		if($results) {
-			$this->removeUCPdashboardSettingByID($userid);
-			//we have all new dashbords ids here
-			$dashbords = json_decode($results['val'],true); dbug($dashbords);
+			$this->removeUCPDashboardSettingByID($userid);
+			//we have all new dashboards ids here
+			$dashbords = json_decode($results['val'],true);
 			$newdashbords = [];
 			foreach($dashbords as $dash){
 				$id = (string)Uuid::uuid4();
@@ -1894,12 +1921,11 @@ class Userman extends FreePBX_Helpers implements BMO {
 				$wids = $sth->fetch(PDO::FETCH_ASSOC);
 				unset($thiswidget);
 				$thiswidget = [];
-				$widgets = json_decode($wids['val'],true);dbug($widgets);
+				$widgets = json_decode($wids['val'],true);
 				unset($allowedwidget);
 				$allowedwidget = [];
 				foreach($widgets as $widget){
 					$updatedwidget = $this->getUserModulesSettingBasedOnTemplate($widget,$userid,$templateid);
-					dbug($updatedwidget);
 					if(!$updatedwidget){
 						//this is not a valid widget for this user
 						continue;
@@ -1921,7 +1947,15 @@ class Userman extends FreePBX_Helpers implements BMO {
 			return ['status'=>false,'message'=> 'No Dashboards created'];
 		}
 	}
-	public function removeUCPdashboardSettingByID($userid){dbug('called removeUCPdashboardSettingByID');
+	/*Remove the Side dashbord of a user */
+	public function removeUCPSideDashboardSettingByID($userid){
+		$sql = "Delete from userman_users_settings where uid=:uid AND `key`='dashboard-simple-layout' ";
+		$sth = $this->db->prepare($sql);
+		$sth->execute(array(':uid' => $userid));
+	}
+
+	/*Remove the Main dashbord of a user */
+	public function removeUCPDashboardSettingByID($userid){
 		//remove all dashbord and its layout dashboards
 		$sql = "select * from userman_users_settings where uid=:uid AND `key`='dashboards' ";
 		$sth = $this->db->prepare($sql);
