@@ -3683,7 +3683,7 @@ class Userman extends FreePBX_Helpers implements BMO {
 		}
 	}
 
-	/* rebuil all users settings template*/
+	/* rebuild all users settings template*/
 	public function rebuildtemplate($tempid){
 		$users = $this->getAllUsers();
 		$count = 0;
@@ -3705,4 +3705,28 @@ class Userman extends FreePBX_Helpers implements BMO {
 		}
 		return ['status'=>false,'message'=> 'widgets not reconfigured'];
 	}
+
+	/*
+	* Return all members associated with the template
+	*/
+	public function getallMemberOfTemplate($tempid){
+		$members = [];
+		$users = $this->getAllUsers();
+		$count = 0;
+		foreach($users as $user){
+			$assigntemplate = $this->getCombinedModuleSettingByID($user['id'],'ucp|template','assigntemplate');
+			$templateid = $this->getCombinedModuleSettingByID($user['id'],'ucp|template','templateid');
+			if($assigntemplate == '0'){
+				continue;// template not assigned
+			}
+			if($templateid ==  $tempid && $user['username'] !='FreePBXUCPTemplateCreator'){
+				$members[] = $user;
+			}
+		}
+		if(count($members) > 0){
+			return ['status'=>true,'members'=> $members];
+		}
+		return ['status'=>false,'message'=> 'Members Not found'];
+	}
+
 }
