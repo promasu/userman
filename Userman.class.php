@@ -886,6 +886,10 @@ class Userman extends FreePBX_Helpers implements BMO {
 			case 'showmembers':
 				$members = $this->getallMemberOfTemplate($request['template']);
 				$template = $this->getTemplateById($request['template']);
+				//lets change the hasupdated to 0
+				$sql = "UPDATE userman_ucp_templates SET `hasupdated`=0 Where id=:id";
+				$sth = $this->db->prepare($sql);
+				$sth->execute(array(':id' => $request['template']));
 				$html .= load_view(dirname(__FILE__).'/views/templatemembers.php', array('members'=>$members,'templateid'=>$request['template'],'name'=>$template['templatename']));
 				break;
 			default:
@@ -1997,6 +2001,9 @@ class Userman extends FreePBX_Helpers implements BMO {
 	* This function will copy the uid UCP dashbord and widgets to  templatesettings
 	*/
 	public function addTemplateSettings($tempid,$uid){dbug('addTemplateSettings');
+		$sql = "UPDATE userman_ucp_templates SET `hasupdated`=1 Where id=:id";
+		$sth = $this->db->prepare($sql);
+		$sth->execute(array(':id' => $tempid));
 		$sql = "SELECT a.val, a.type,a.key FROM ".$this->userSettingsTable."  a, ".$this->userTable." b WHERE b.id = a.uid AND b.id = :id AND a.module = 'ucp|Global'";
 		$sth = $this->db->prepare($sql);
 		$sth->execute(array(':id' => $uid));
@@ -3537,7 +3544,7 @@ class Userman extends FreePBX_Helpers implements BMO {
 	}
 
 	public function updateUcpTemplate($editData){
-		$sql = "UPDATE userman_ucp_templates SET `templatename`=:name,`importedfromuid`=:importedfromuid,`importedfromuname`=:importedfromuname,`defaultexten`=:defaultexten,`description`=:description Where id=:id";
+		$sql = "UPDATE userman_ucp_templates SET `templatename`=:name,`importedfromuid`=:importedfromuid,`importedfromuname`=:importedfromuname,`defaultexten`=:defaultexten,`description`=:description,`hasupdated`=1 Where id=:id";
 		$sth = $this->db->prepare($sql);
 		$sth->execute(array(':name' => $editData['templatename'],':importedfromuid'=>$editData['importedfromuid'],':importedfromuname'=>$editData['importedfromuname'],':defaultexten'=>$editData['defaultexten'] ,':description' => $editData['description'], ':id' => $editData['id']));
 		return true;

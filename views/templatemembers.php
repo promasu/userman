@@ -23,6 +23,9 @@ function showMiddle() {
 				<fieldset class='users_list ui-sortable left col-sm-5' id='users_deny' data-otherid='users_allow'>
 					<legend> <?php echo _("Members")?> </legend>
 					<?php 
+					if(!is_array($members['members'])){
+						$members['members'] = [];
+					}
 					foreach ($members['members'] as $u) {
 						echo "    <span class='dragitem' data-userid='".$u['id']."'>".$u['username']."</span>\n";
 					}
