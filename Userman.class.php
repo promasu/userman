@@ -282,6 +282,7 @@ class Userman extends FreePBX_Helpers implements BMO {
 	 */
 	public function doConfigPageInit($display) {
 		$request = freepbxGetSanitizedRequest();
+		var_dump($request);
 		if(isset($request['action']) && $request['action'] == 'deluser') {
 			$ret = $this->deleteUserByID($request['user']);
 			$this->message = array(
@@ -541,6 +542,9 @@ class Userman extends FreePBX_Helpers implements BMO {
 						$this->addTemplateSettings($id,$uid);
 					}
 				break;
+				case 'savemembers':
+					$members_id = $request['selected_usermembers'];
+					break;
 			}
 		}
 	}
@@ -605,6 +609,12 @@ class Userman extends FreePBX_Helpers implements BMO {
 						'value' => _("Reset"),
 						'class' => array('hidden')
 					),
+					'cancel' => array(
+						'name' => 'cancel',
+						'id' => 'cancel',
+						'value' => _("Cancel"),
+						'class' => array('hidden')
+					),
 				);
 
 				if($request['action'] != 'showuser' && $request['action'] != 'showgroup'){
@@ -642,10 +652,10 @@ class Userman extends FreePBX_Helpers implements BMO {
 						$permissions = $this->getAuthAllPermissions($request['directory']);
 					}
 				}
-
 				if(empty($request['action'])){
 					unset($buttons['submitsend']);
 				}
+	
 			}
 		return $buttons;
 	}
@@ -872,6 +882,10 @@ class Userman extends FreePBX_Helpers implements BMO {
 					)
 				);
 			break;
+			case 'showmembers':
+				$members = $this->getallMemberOfTemplate($request['template']);
+				$html .= load_view(dirname(__FILE__).'/views/templatemembers.php', $members);
+				break;
 			default:
 				$users = $this->getAllUsers();
 				$groups = $this->getAllGroups();
