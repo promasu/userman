@@ -9,45 +9,48 @@ function showMiddle() {
 }
 ?>
 <div class="fpbx-container">
-	<h1>Users Template</h1>
-	<ul class="nav nav-tabs" id="template-tabs" role="tablist">
-  		<li data-name="users" class="change-tab active"><a href="#users" role="tab" data-toggle="tab"><?php echo _("Members") ?></a></li>
+	<h1>UCP Templates Users</h1>
+	<form method='post' id="form_usertemplate" name ="form_usertemplate" action='config.php?display=userman' class="fpbx-submit" >
+	<input type="hidden" name="type" value="rebuilducp">
+	<input type="hidden" name="submittype" value="gui">
+	<input type="hidden" name="templateid" value=<?php echo $templateid;?>>
+	<ul class="nav nav-tabs" id="Users" role="tablist">
+		<li data-name="users" class="change-tab active"><a href="#users" role="tab" data-toggle="tab"><?php echo $name ?></a></li>
 	</ul>
-	<form method='post' id="form_usertemplate" name ="form_usertemplate" action='config.php?display=userman#ucptemplates' class="fpbx-submit">
-		<input type="hidden" name="type" value="savemembers">
-		<input type="hidden" name="submittype" value="gui">
-		<div class="tab-content display">
-			<div id='users' class='tab-pane active'>
-				<div class = "row">
-					<fieldset class='users_list ui-sortable left col-sm-5' id='members' data-otherid='selected_members'>
-						<legend> <?php echo _("Members")?> </legend>
-						<?php foreach ($members as $key => $val) {
-							echo "<span class='dragitem' data-member='".$val['id']."'>".$val['username']."</span>\n";
-						}?>
+	<div class="tab-content display">
+		<div id='users' class='tab-pane active'>
+			<div class = "row">
+				<fieldset class='users_list ui-sortable left col-sm-5' id='users_deny' data-otherid='users_allow'>
+					<legend> <?php echo _("Members")?> </legend>
+					<?php 
+					foreach ($members['members'] as $u) {
+						echo "    <span class='dragitem' data-userid='".$u['id']."'>".$u['username']."</span>\n";
+					}
+					?>
 					</fieldset>
 					<?php echo showMiddle(); ?>
-					<fieldset class='users_list ui-sortable right col-sm-5' id='selected_members' data-otherid='members'>
-						<legend> <?php echo _("Selected Members")?> </legend>
-					</fieldset>
-				</div>
+					<fieldset class='users_list ui-sortable right col-sm-5' id='users_allow' data-otherid='users_deny'>
+					<legend> <?php echo _("Force Rebuild Templates For Users")?> </legend>
+				</fieldset>
 			</div>
 		</div>
+	</div>
 	</form>
 </div>
 <script type='text/javascript'>
 
 	$(document).ready(function() {			
-		Sortable.create(members, {
-			group: 'usr',
-			multiDrag: true,
-			selectedClass: "selected"
-		});
-		Sortable.create(selected_members, {
-			group: 'usr',
-			multiDrag: true,
-			selectedClass: "selected"
-		});
+		Sortable.create(users_allow, {
+		group: 'usr',
+		multiDrag: true,
+		selectedClass: "selected"
+	});
 
+	Sortable.create(users_deny, {
+		group: 'usr',
+		multiDrag: true,
+		selectedClass: "selected"
+	});
 		$(window).resize(function() { set_height(); });
 		function set_height() {
 			var height = 0;
@@ -56,41 +59,35 @@ function showMiddle() {
 				height = $(this).height() > height ? $(this).height() : height;
 			}).height(height);
 		}
-		// Enable 'Move All' buttons
 		$('.toggle').click(function(e) {
-			e.preventDefault();
-			var cmd=$(this).data('cmd');
-			var tabname = $(".nav-tabs .active").data('name');
-			var thistab = $('#'+tabname).children();
-			console.log(thistab.children());
-			var left = thistab.children('.left');
-			var right = thistab.children('.right');
-			if (cmd == 'allleft') {
-				right.children('span').each(function() { $(this).appendTo(left); });
-			} else if (cmd == 'allright') {
-				left.children('span').each(function() { $(this).appendTo(right); });
-			} else {
-				oldleft = left.children('span');
-				right.children('span').each(function() { $(this).appendTo(left); });
-				oldleft.each(function() { $(this).appendTo(right); });
-			}
-
-		});
-		$('form').submit(function() {
-			var form=$(this), mem_id=[];
-			$('#selected_members>span').each(function() {
-				form.append('<input type="hidden" name="selected_usermembers[]" value="'+$(this).attr('data-member')+'">');
+		e.preventDefault();
+		var cmd=$(this).data('cmd');
+		var tabname = $(".nav-tabs .active").data('name');
+		var thistab = $('#'+tabname).children();
+		console.log(thistab.children());
+		var left = thistab.children('.left');
+		var right = thistab.children('.right');
+		if (cmd == 'allleft') {
+			right.children('span').each(function() { $(this).appendTo(left); });
+		} else if (cmd == 'allright') {
+			left.children('span').each(function() { $(this).appendTo(right); });
+		} else {
+			oldleft = left.children('span');
+			right.children('span').each(function() { $(this).appendTo(left); });
+			oldleft.each(function() { $(this).appendTo(right); });
+		}
+	});
+});
+	$('form').submit(function() {
+			var form=$(this);
+			$('fieldset#users_allow > span, textarea').each(function(){console.log('usrid ='+$(this).data("userid"));
+				form.append('<input type="hidden" name="users_selected[]" value="'+$(this).data("userid") +'">');
 			});
-			console.log('mem',mem_id);
-			return true;
 		});
 		$("#cancel").click(function(e) {
 			e.preventDefault();
 			e.stopPropagation();
 			window.location = '?display=userman#ucptemplates';
 		});
-
-
-	})
 	
 </script>

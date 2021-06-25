@@ -277,7 +277,6 @@ $( document ).ready(function() {
 		$('input[name="delete"]').removeClass('hidden');
 	} else if(params.action == "showmembers"){
 		$('input[name="submit"]').removeClass('hidden');
-		$('input[name="reset"]').removeClass('hidden');
 		$('input[name="cancel"]').removeClass('hidden');
 	}
 	else {
@@ -508,10 +507,9 @@ function ucptemplatesActions(value, row, index) {
 	var unlockKey = "'" + row.key + "'";
 	var html = '<a href="?display=userman&amp;action=showucptemplate&amp;template='+row.id+'" title="Reimport from a user"><i class="fa fa-edit"> </i></a>';
 	html += '<a class="clickable" onclick="return redirectToUCP('+row.id+','+unlockKey+')" title="Edit Template"><i class="fa fa-eye"" data-section="ucptemplates" data-type="ucptemplates"  data-id="'+row.id+'"></i></a>';
-	html += '<a class="clickable" onclick="return rebuildwidgets('+row.id+')" title="Force Rebuild widgets"><i class="fa fa-refresh"" data-section="ucptemplates" data-type="ucptemplates"  data-id="'+row.id+'"></i></a>';
+	html += '<a href="?display=userman&amp;action=showmembers&amp;template='+row.id+'" title="Force Rebuild widgets"><i class="fa fa-refresh" data-section="ucptemplates" data-type="ucptemplates"  data-id="'+row.id+'"></i></a>';
 	html += '<a class="clickable" title="delete a template"><i class="fa fa-trash-o" data-section="ucptemplates" data-type="ucptemplates"  data-id="'+row.id+'"></i></a>';
-	html += '<a href="?display=userman&amp;action=showmembers&amp;template='+row.id+'" title="user templates"><i class="fa fa-paper-plane" data-section="ucptemplates" data-type="ucptemplates"  data-id="'+row.id+'"></i></a>';
-	return html;
+		return html;
 }
 
 $("#table-ucptemplates").on("post-body.bs.table", function () {

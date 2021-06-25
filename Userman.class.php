@@ -282,7 +282,6 @@ class Userman extends FreePBX_Helpers implements BMO {
 	 */
 	public function doConfigPageInit($display) {
 		$request = freepbxGetSanitizedRequest();
-		var_dump($request);
 		if(isset($request['action']) && $request['action'] == 'deluser') {
 			$ret = $this->deleteUserByID($request['user']);
 			$this->message = array(
@@ -542,8 +541,10 @@ class Userman extends FreePBX_Helpers implements BMO {
 						$this->addTemplateSettings($id,$uid);
 					}
 				break;
-				case 'savemembers':
-					$members_id = $request['selected_usermembers'];
+				case 'rebuilducp':
+					$userids = array_unique($request['users_selected']);
+					$templateid = $request['templateid'];
+					$this->rebuildtemplate($userids,$templateid);
 					break;
 			}
 		}
@@ -884,7 +885,8 @@ class Userman extends FreePBX_Helpers implements BMO {
 			break;
 			case 'showmembers':
 				$members = $this->getallMemberOfTemplate($request['template']);
-				$html .= load_view(dirname(__FILE__).'/views/templatemembers.php', $members);
+				$template = $this->getTemplateById($request['template']);
+				$html .= load_view(dirname(__FILE__).'/views/templatemembers.php', array('members'=>$members,'templateid'=>$request['template'],'name'=>$template['templatename']));
 				break;
 			default:
 				$users = $this->getAllUsers();
@@ -3697,18 +3699,17 @@ class Userman extends FreePBX_Helpers implements BMO {
 		}
 	}
 
-	/* rebuild all users settings template*/
-	public function rebuildtemplate($tempid){
-		$users = $this->getAllUsers();
+	/* rebuild given users template settings*/
+	public function rebuildtemplate($users = array(),$tempid){
 		$count = 0;
 		foreach($users as $user){
-			$assigntemplate = $this->getCombinedModuleSettingByID($user['id'],'ucp|template','assigntemplate');
-			$templateid = $this->getCombinedModuleSettingByID($user['id'],'ucp|template','templateid');
+			$assigntemplate = $this->getCombinedModuleSettingByID($user,'ucp|template','assigntemplate');
+			$templateid = $this->getCombinedModuleSettingByID($user,'ucp|template','templateid');
 			if($assigntemplate == '0'){
 				continue;// template not assigned
 			}
 			if($templateid ==  $tempid){
-				$re = $this->updateUserUcpByTemplate($user['id'],$tempid);
+				$re = $this->updateUserUcpByTemplate($user,$tempid);
 				if($re['status']){
 					$count ++;
 				}
@@ -3742,5 +3743,4 @@ class Userman extends FreePBX_Helpers implements BMO {
 		}
 		return ['status'=>false,'message'=> 'Members Not found'];
 	}
-
 }
