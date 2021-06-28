@@ -132,7 +132,7 @@
 											<i class="fa fa-user-times"></i> <span><?php echo _('Delete')?></span>
 										</button>
 									</div>
-									<table data-toolbar="#toolbar-ucptemplates" data-url="ajax.php?module=userman&amp;command=getUcpTemplates" data-cache="false" data-toggle="table" data-maintain-selected="true" data-show-columns="true" data-pagination="true" data-search="true" class="table table-striped" id="table-ucptemplates" data-type="ucptemplates" data-escape="true">
+									<table data-toolbar="#toolbar-ucptemplates" data-url="ajax.php?module=userman&amp;command=getUcpTemplates" data-cache="false" data-toggle="table" data-maintain-selected="true" data-show-columns="true" data-pagination="true" data-search="true" class="table table-striped" id="table-ucptemplates" data-type="ucptemplates" data-escape="true" data-row-style="rowStyle">
 										<thead>
 											<tr>
 												<th data-checkbox="true"></th>
@@ -161,4 +161,4 @@
 <script>
 	var drivers = <?php echo json_encode($auths)?>;
 	var directoryMapValues = <?php echo json_encode($directoryMap)?>;
-	</script>
+</script>

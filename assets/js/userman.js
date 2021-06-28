@@ -511,7 +511,10 @@ function ucptemplatesActions(value, row, index) {
 	html += '<a class="clickable" title="delete a template"><i class="fa fa-trash-o" data-section="ucptemplates" data-type="ucptemplates"  data-id="'+row.id+'"></i></a>';
 	return html;
 }
-
+function rowStyle(row, index){
+	var style = (row.hasupdated === "1") ? { css: { background: '#e43c62'} } : { css: { background: 'none'} }
+	return style;
+}
 $("#table-ucptemplates").on("post-body.bs.table", function () {
 	$(".default-check").click(function() {
 		var $this = this;
